@@ -13,6 +13,7 @@ use IO::Handle;
 use JSON;
 use Redis;
 use POSIX;
+use Sys::Hostname;
 
 GetOptions(
 	'debug|d'	=> \my $DEBUG,
@@ -68,11 +69,16 @@ sub control_handler {
 			chomp $input;
 			my $d  = decode_json $input;
 			# say STDERR Dumper($d);
-			if ( $d->{ alert }->{ severity } == 1 ) {
-				say $d->{ src_ip } . ' '. $d->{ alert }->{ signature };
-				$redis->set( 'suricata:'.$d->{ src_ip } => $d->{ src_ip } , EX => 60 );
-				$redis->publish( suricata => $d->{ src_ip } );
-			}
+			say $d->{ src_ip } . ' '. $d->{ alert }->{ signature } . ' ' . $d->{ alert }->{ signature_id };
+			#$redis->set( 'suricata:'.$d->{ src_ip } => $d->{ src_ip } , EX => 60 );
+			my $message = {
+				version		=> 1,
+				date		=> time,
+				id		=> 'suricata publisher',
+				host		=> hostname,
+				event		=> $d,
+			};
+			$redis->publish( suricata => encode_json( $message ) );
 		} 
 	);
 	$watchers{ $fh } = { fh => $fh , aio => $io_watcher } ;

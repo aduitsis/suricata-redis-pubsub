@@ -12,6 +12,11 @@ use Getopt::Long;
 use IO::Handle;
 use JSON;
 use AnyEvent::Redis;
+use List::Util qw(any);
+use FindBin qw($Bin);
+use lib "$Bin/../lib";
+use IPv6::Address;
+use Data::Printer;
 
 GetOptions(
 	'debug|d'		=> \my $DEBUG,
@@ -19,15 +24,21 @@ GetOptions(
 	'redis_port|p=i'	=> \( my $redis_port = 6379 ),
 	'user|u=s'		=> \( my $run_as = 'nobody' ),
 	'tick|t=i'		=> \( my $tick = 10 ),
+	'dest=s'		=> \( my $global_destination = 'self' ),
 	'help|h|?'		=> \( my $help ),
+	'severity-thres=i'	=> \( my $severity_threshold = 1 ),
+	'exclude-sig=s@'	=> \( my $exclude_sigs ),
+	'exclude-source=s@'	=> \( my $exclude_sources ),
+	'duration=i'		=> \( my $duration = 60 ),
 );
 
 ## pod2usage(-verbose=>2) if $help;
 
 $redis_host // die 'please supply the redis server with the --redis_host option';
 
-
 my $quit_program = AnyEvent->condvar;
+
+my @excluded_sources = map { IPv4Subnet->new( $_ ) } @{ $exclude_sources } ;
 
 my %ips;
 
@@ -40,10 +51,24 @@ my $redis = AnyEvent::Redis->new(
 );
 
 my $cv = $redis->subscribe("suricata", sub {
-	my ( $message, $channel ) = @_;
-	say '+ '.$message;
-	# ($actual_channel is provided for pattern subscriptions.)
-	$ips{ $message } = 60;
+	my ( $json, $channel ) = @_;
+	my $message = decode_json( $json );	
+	$DEBUG && p $message;
+	my $ip = $message->{ event }->{ src_ip };
+	if( $message->{event}->{alert}->{severity} > $severity_threshold ) {
+		$DEBUG && say STDERR "event excluded due to severity";
+	}
+	elsif( any { $_ eq $message->{event}->{alert}->{signature_id} } @{$exclude_sigs} ) {
+		$DEBUG && say STDERR "event excluded due to signature";
+	}
+	elsif( any { $_->contains( $message->{event}->{src_ip} ) } @excluded_sources ) {
+		$DEBUG && say STDERR "event excluded due to source IP"
+	}
+	else {
+		say "announce route $ip/32 next-hop $global_destination";
+		# ($actual_channel is provided for pattern subscriptions.)
+		$ips{ $ip } = $duration;
+	}
 });
 
 my $w = AnyEvent->timer (after => 0, interval => $tick, cb => sub {
@@ -51,7 +76,8 @@ my $w = AnyEvent->timer (after => 0, interval => $tick, cb => sub {
 	for(keys %ips) {
 		$ips{ $_ } -= $tick;
 		if ($ips{ $_ }<=0) {
-			say '- '. $_;
+			$DEBUG && say STDERR '- '. $_;
+			say "withdraw route $_/32 next-hop $global_destination";
 			delete $ips{ $_ };
 		}
 		$DEBUG && say STDERR Dumper(\%ips)
