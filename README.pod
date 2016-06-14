@@ -1,0 +1,94 @@
+=head1 Suricata Redis PubSub
+
+A simple set of tools to announce Suricata events into a Redis pubsub channel
+and subscribe to those events with an exabgp client program.
+
+
+=head1 publisher
+
+Publisher.pl binds and listens to a unix socket to which Suricata will connect
+and transmit events. Upon receiving each event, the publisher will construct an
+appropriate message encoded in JSON and publish it in a Redis pubsub channel.
+
+
+=head1 subscriber
+
+Subscriber.pl listens on the previously mentioned Redis channel for
+alert messages. Upon receiving each alert, it will write an appropriate exabgp
+control message in its standard output, announcing the source IP of the alert to
+be routed to an appropriate target (most typically a blackhole). At the same
+time, a countdown is initiated for that source and when it reaches zero the
+source is withdrawn with an appropriate exabgp message. The incoming messages
+can be filtered by signature, source IP prefix or severity. 
+
+
+=head1 options
+
+At present, documentation is sparse as the options are being worked on. Please
+review the two scripts for available cli parameters. 
+
+=over 2
+
+=item 
+-d: debug mode 
+
+=back 
+
+=head1 examples
+
+=head2 publisher
+
+ publisher.pl -r redis_server -u nobody -s suricata.sock
+  --channel suricata
+
+=head2 subscriber
+ 
+ subscriber.pl --redis_host redis_server --exclude-sig=2013357
+  --exclude-source=10.10.0.0/16 --severity-thres=2 
+
+=head1 author
+
+Athanasios Douitsis, L<aduitsis@cpan.org> 
+
+=head1 bugs / suggestions
+
+Please file a bug in github, many thanks in advance.
+
+
+=head1 dependencies
+
+Please install these modules in order for this software to work:
+
+=over
+
+=item *
+AnyEvent
+
+=item *
+AnyEvent::Redis
+
+=item *
+JSON
+
+=item * 
+Data::Printer
+
+=item *
+Sub::Install (for the IPv6::Address to work)
+
+=back 
+
+The IPv6::Address is a separate Perl module, writen also by me (see
+L<https://github.com/aduitsis/IPv6-Address>, but I have included a local copy
+inside this package to make things easier. It might become required to install
+that module in the future.
+
+
+=head1 license
+
+Copyright (c) 2016 Athanasios Douitsis. All rights reserved.
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+
+=cut
