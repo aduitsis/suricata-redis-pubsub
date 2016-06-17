@@ -1,7 +1,10 @@
 =head1 Suricata Redis PubSub
 
-A simple set of tools to announce Suricata events into a Redis pubsub channel
-and subscribe to those events with an exabgp client program.
+A simple set of tools to announce Suricata alerts into a Redis pubsub channel
+and subscribe to those events with an exabgp client program. 
+
+The publisher can also publish into a channel subscribed by a logstash instance,
+e.g. to insert alerts into an elasticsearch cluster.
 
 
 =head1 publisher
