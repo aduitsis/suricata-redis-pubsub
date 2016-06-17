@@ -30,6 +30,7 @@ GetOptions(
 	'exclude-sig=s@'	=> \( my $exclude_sigs ),
 	'exclude-source=s@'	=> \( my $exclude_sources ),
 	'duration=i'		=> \( my $duration = 60 ),
+	'channel=s'		=> \( my $channel = 'suricata' ),
 );
 
 ## pod2usage(-verbose=>2) if $help;
@@ -50,7 +51,7 @@ my $redis = AnyEvent::Redis->new(
 	on_cleanup => sub { warn "Connection closed: @_" },
 );
 
-my $cv = $redis->subscribe("suricata", sub {
+my $cv = $redis->subscribe($channel, sub {
 	my ( $json, $channel ) = @_;
 	my $message = decode_json( $json );	
 	$DEBUG && p $message;
