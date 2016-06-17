@@ -27,10 +27,50 @@ can be filtered by signature, source IP prefix or severity.
 At present, documentation is sparse as the options are being worked on. Please
 review the two scripts for available cli parameters. 
 
-=over 2
+=head2 publisher
 
-=item 
--d: debug mode 
+=over
+
+=item B<-d>
+
+Run in debug mode, debug messages are printed in the standard error.
+
+=item B<-r|--redis> I<redis server>
+
+Connect to I<redis server> and publish events. This is required and 
+does not have a default value.
+
+=item B<-u|--user> I<userid>
+
+Drop privileges to user I<userid>. Defaults to nobody.
+
+=item B<-s|--sock> I<socket>
+
+Listen for suricata events in UNIX socket I<socket>. Default value is
+B</var/run/suricata.sock>. You should configure your suricata to use that
+socket. Here is a very simple example fragment:
+
+  - eve-log:
+    enabled: yes
+      filetype: unix_stream
+      filename: /var/run/suricata.sock
+      types:
+        - alert:
+
+
+=item B<-c|--channel> I<channel_name>
+
+Publish events in Redis channel named I<channel_name>. The event schema is in
+flux currently. However, it is guaranteed that the subscriber and the publisher
+code will move in lockstep across changes in this repo.
+
+=item B<--logstash>
+
+Also publish in channel logstash-I<channel_name> (see -c option above). This is
+assumed to be a channel where a logstash instance has subscribed. The JSON posted
+in this channel is flat. Nested objects are not forbidden in elasticsearch and
+logstash, but may present some difficulties. See L<https://github.com/elastic/kibana/pull/5411>
+and L<https://github.com/elastic/kibana/issues/1084>.
 
 =back 
 
@@ -39,7 +79,7 @@ review the two scripts for available cli parameters.
 =head2 publisher
 
  publisher.pl -r redis_server -u nobody -s suricata.sock
-  --channel suricata
+  --channel suricata --logstash
 
 =head2 subscriber
  
