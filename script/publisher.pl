@@ -20,6 +20,8 @@ GetOptions(
 	'redis|r=s'	=> \my $redis_str,
 	'sock|s=s'	=> \( my $sock = '/var/run/suricata.sock' ),
 	'user|u=s'	=> \( my $run_as = 'nobody' ),
+	'channel=s'	=> \( my $channel = 'suricata' ),
+	'logstash'	=> \( my $logstash ),
 	'help|h|?'	=> \( my $help ),
 );
 
@@ -78,7 +80,17 @@ sub control_handler {
 				host		=> hostname,
 				event		=> $d,
 			};
-			$redis->publish( suricata => encode_json( $message ) );
+			$redis->publish( $channel => encode_json( $message ) );
+
+			if( $logstash ) {
+				# logstash flat JSON, suitable for logstash redis subscribers
+				if( exists $d->{alert} ) {
+					$d->{ $_ } = $d->{alert}->{$_} for keys %{$d->{alert}};
+					delete $d->{alert};
+					$d->{host} = hostname;	
+				}
+				$redis->publish( "logstash-$channel" => encode_json( $d ) );
+			}
 		} 
 	);
 	$watchers{ $fh } = { fh => $fh , aio => $io_watcher } ;
