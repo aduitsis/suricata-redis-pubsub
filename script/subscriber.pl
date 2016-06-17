@@ -29,6 +29,9 @@ GetOptions(
 	'severity-thres=i'	=> \( my $severity_threshold = 1 ),
 	'exclude-sig=s@'	=> \( my $exclude_sigs ),
 	'exclude-source=s@'	=> \( my $exclude_sources ),
+	'exclude-destination=s@'=> \( my $exclude_destinations ),
+	'exclude-dest-port=i@'	=> \( my $exclude_dest_ports ),
+	'exclude-src-port=i@'	=> \( my $exclude_src_ports ),
 	'duration=i'		=> \( my $duration = 60 ),
 	'channel=s'		=> \( my $channel = 'suricata' ),
 );
@@ -40,6 +43,7 @@ $redis_host // die 'please supply the redis server with the --redis_host option'
 my $quit_program = AnyEvent->condvar;
 
 my @excluded_sources = map { IPv4Subnet->new( $_ ) } @{ $exclude_sources } ;
+my @excluded_destinations = map { IPv4Subnet->new( $_ ) } @{ $exclude_destinations } ;
 
 my %ips;
 
@@ -64,6 +68,15 @@ my $cv = $redis->subscribe($channel, sub {
 	}
 	elsif( any { $_->contains( $message->{event}->{src_ip} ) } @excluded_sources ) {
 		$DEBUG && say STDERR "event excluded due to source IP"
+	}
+	elsif( any { $_->contains( $message->{event}->{dest_ip} ) } @excluded_destinations ) {
+		$DEBUG && say STDERR "event excluded due to destination IP"
+	}
+	elsif( any { $message->{ dest_port } == $_ } @{$exclude_dest_ports} ) {
+		$DEBUG && say STDERR "event excluded due to dest port"
+	}
+	elsif( any { $message->{ src_port } == $_ } @{$exclude_src_ports} ) {
+		$DEBUG && say STDERR "event excluded due to src port"
 	}
 	else {
 		say "announce route $ip/32 next-hop $global_destination";
