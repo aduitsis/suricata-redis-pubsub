@@ -74,6 +74,65 @@ and L<https://github.com/elastic/kibana/issues/1084>.
 
 =back 
 
+=head2 subscriber
+
+=item B<-r|--redis_host> I<redis server>
+
+Connect to redis server and subscribe to an event channel.
+
+=item B<-p|--redis_port> I<redis port>
+
+Redis server port, defaults to 6379.
+
+=item B<-u|--user> I<userid>
+
+Drop privileges to userid, defaults to nobody.
+
+=item B<-t|--tick> I<interval>
+
+Update timers every I<interval> seconds. When an IP is announced, its internal time to live 
+timer is set to a predefined value (see B<--duration>). As time passes, the time to live 
+decreases and when it reaches 0, the IP is withdawn. The B<tick> value defines how often the
+TTLs will be updated.
+
+=item B<--dest> I<global_destination>
+
+Announce the next hop to be I<global_destination>. Defaults to 'self'.
+
+=item B<--severity-thres> I<threshold>
+
+Do not process events with alert severity of more than I<threshold>. Defaults to 1, meaning that
+events of severity 2 and above will be ignored.
+
+=item B<--exclude-sig> I<signature> [ B<--exclude-sig> I<signature> ] ...
+
+Exclude alerts of I<signature> id from processing. The option can be used multiple times.
+
+=item B<--exclude-source> I<CIDR source>  [ B<--exclude-source> I<CIDR source> ] ...
+
+Exclude alerts with source IP I<CIDR source>. Multiple sources are allowed.
+
+=item B<--exclude-destination> I<CIDR destination> [ B<--exclude-destination> I<CIDR destination> ] ...
+
+Exclude alerts with destination IP I<CIDR destination>. Multiple destinations are allowed.
+
+=item B<--exclude-dest-port> I<destination port> [ B<--exclude-destination> I<CIDR destination> ] ...
+
+Exclude alerts with destination port I<destination port>. Multiple destination ports are allowed.
+
+=item B<--exclude-src-port> I<source port> [ B<--exclude-src-port> I<source port> ] ...
+
+Exclude alerts with source port I<source port>. Multiple source ports are allowed.
+
+=item B<--duration> I<duration>
+
+Time to live of a BGP announcement. After I<duration> seconds elapse, the BGP annoucement is withdrawn.
+
+=item B<-c|--channel> I<channel_name>
+
+Name of channel to subscribe, defaults to 'suricata'.
+
+
 =head1 examples
 
 =head2 publisher
