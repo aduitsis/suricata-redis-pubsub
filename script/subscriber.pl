@@ -72,10 +72,10 @@ my $cv = $redis->subscribe($channel, sub {
 	elsif( any { $_->contains( $message->{event}->{dest_ip} ) } @excluded_destinations ) {
 		$DEBUG && say STDERR "event excluded due to destination IP"
 	}
-	elsif( any { $message->{ dest_port } == $_ } @{$exclude_dest_ports} ) {
+	elsif( any { $message->{ event }->{ dest_port } == $_ } @{$exclude_dest_ports} ) {
 		$DEBUG && say STDERR "event excluded due to dest port"
 	}
-	elsif( any { $message->{ src_port } == $_ } @{$exclude_src_ports} ) {
+	elsif( any { $message->{ event }->{ src_port } == $_ } @{$exclude_src_ports} ) {
 		$DEBUG && say STDERR "event excluded due to src port"
 	}
 	else {
