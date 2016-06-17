@@ -142,8 +142,11 @@ Name of channel to subscribe, defaults to 'suricata'.
 
 =head2 subscriber
  
- subscriber.pl --redis_host redis_server --exclude-sig=2013357
-  --exclude-source=10.10.0.0/16 --severity-thres=2 
+ subscriber.pl --redis_host redis_server --tick 5 
+   --exclude-sig=2013357 --exclude-sig=2013360
+   --exclude-source=10.10.0.0/16 --severity-thres 2 
+   --exclude-dest-port 9103
+ 
 
 =head1 author
 
