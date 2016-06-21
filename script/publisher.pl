@@ -35,7 +35,7 @@ my $quit_program = AnyEvent->condvar;
 my $guard = tcp_server 'unix/', $sock , \&control_handler;
 
 # now drop privileges https://gist.github.com/tommybutler/6944027
-my ( $uid, $gid ) = ( getpwnam 'nobody' )[ 2, 3 ];
+my ( $uid, $gid ) = ( getpwnam $run_as )[ 2, 3 ];
 die $! unless $uid && $gid;
 if ( $> == 0 ) {
 	POSIX::setgid( $gid ); # GID must be set before UID!
