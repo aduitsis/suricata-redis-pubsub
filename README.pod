@@ -79,6 +79,8 @@ and L<https://github.com/elastic/kibana/issues/1084>.
 
 =head2 subscriber
 
+=over
+
 =item B<-r|--redis_host> I<redis server>
 
 Connect to redis server and subscribe to an event channel.
@@ -135,6 +137,7 @@ Time to live of a BGP announcement. After I<duration> seconds elapse, the BGP an
 
 Name of channel to subscribe, defaults to 'suricata'.
 
+=back
 
 =head1 examples
 
