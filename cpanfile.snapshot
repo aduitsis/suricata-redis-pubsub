@@ -136,6 +136,45 @@ DISTRIBUTIONS
       base 0
       strict 0
       warnings 0
+  ExtUtils-Config-0.008
+    pathname: L/LE/LEONT/ExtUtils-Config-0.008.tar.gz
+    provides:
+      ExtUtils::Config 0.008
+    requirements:
+      Data::Dumper 0
+      ExtUtils::MakeMaker 6.30
+      strict 0
+      warnings 0
+  ExtUtils-Helpers-0.022
+    pathname: L/LE/LEONT/ExtUtils-Helpers-0.022.tar.gz
+    provides:
+      ExtUtils::Helpers 0.022
+      ExtUtils::Helpers::Unix 0.022
+      ExtUtils::Helpers::VMS 0.022
+      ExtUtils::Helpers::Windows 0.022
+    requirements:
+      Carp 0
+      Exporter 5.57
+      ExtUtils::MakeMaker 6.30
+      File::Basename 0
+      File::Copy 0
+      File::Spec::Functions 0
+      Module::Load 0
+      Text::ParseWords 3.24
+      strict 0
+      warnings 0
+  ExtUtils-InstallPaths-0.011
+    pathname: L/LE/LEONT/ExtUtils-InstallPaths-0.011.tar.gz
+    provides:
+      ExtUtils::InstallPaths 0.011
+    requirements:
+      Carp 0
+      ExtUtils::Config 0.002
+      ExtUtils::MakeMaker 0
+      File::Spec 0
+      perl 5.006
+      strict 0
+      warnings 0
   File-HomeDir-1.00
     pathname: A/AD/ADAMK/File-HomeDir-1.00.tar.gz
     provides:
@@ -167,6 +206,21 @@ DISTRIBUTIONS
     requirements:
       ExtUtils::MakeMaker 0
       perl 5.006
+  IO-Socket-Timeout-0.32
+    pathname: D/DA/DAMS/IO-Socket-Timeout-0.32.tar.gz
+    provides:
+      IO::Socket::Timeout 0.32
+      IO::Socket::Timeout::Role::PerlIO 0.32
+      IO::Socket::Timeout::Role::SetSockOpt 0.32
+    requirements:
+      ExtUtils::MakeMaker 0
+      File::Spec 0
+      IO::Handle 0
+      IPC::Open3 0
+      Module::Build::Tiny 0.039
+      PerlIO::via::Timeout 0.32
+      Test::More 0
+      Test::TCP 0
   IPv6-Address-0.203
     pathname: A/AD/ADUITSIS/IPv6-Address-0.203.tar.gz
     provides:
@@ -191,6 +245,65 @@ DISTRIBUTIONS
     requirements:
       ExtUtils::MakeMaker 0
       Test::More 0
+  Log-Log4perl-1.47
+    pathname: M/MS/MSCHILLI/Log-Log4perl-1.47.tar.gz
+    provides:
+      L4pResurrectable 0.01
+      Log::Log4perl 1.47
+      Log::Log4perl::Appender undef
+      Log::Log4perl::Appender::Buffer undef
+      Log::Log4perl::Appender::DBI undef
+      Log::Log4perl::Appender::File undef
+      Log::Log4perl::Appender::Limit undef
+      Log::Log4perl::Appender::RRDs undef
+      Log::Log4perl::Appender::Screen undef
+      Log::Log4perl::Appender::ScreenColoredLevels undef
+      Log::Log4perl::Appender::Socket undef
+      Log::Log4perl::Appender::String undef
+      Log::Log4perl::Appender::Synchronized undef
+      Log::Log4perl::Appender::TestArrayBuffer undef
+      Log::Log4perl::Appender::TestBuffer undef
+      Log::Log4perl::Appender::TestFileCreeper undef
+      Log::Log4perl::Catalyst undef
+      Log::Log4perl::Config undef
+      Log::Log4perl::Config::BaseConfigurator undef
+      Log::Log4perl::Config::DOMConfigurator 0.03
+      Log::Log4perl::Config::PropertyConfigurator undef
+      Log::Log4perl::Config::Watch undef
+      Log::Log4perl::DateFormat undef
+      Log::Log4perl::Filter undef
+      Log::Log4perl::Filter::Boolean undef
+      Log::Log4perl::Filter::LevelMatch undef
+      Log::Log4perl::Filter::LevelRange undef
+      Log::Log4perl::Filter::MDC undef
+      Log::Log4perl::Filter::StringMatch undef
+      Log::Log4perl::InternalDebug undef
+      Log::Log4perl::JavaMap undef
+      Log::Log4perl::JavaMap::ConsoleAppender undef
+      Log::Log4perl::JavaMap::FileAppender undef
+      Log::Log4perl::JavaMap::JDBCAppender undef
+      Log::Log4perl::JavaMap::NTEventLogAppender undef
+      Log::Log4perl::JavaMap::RollingFileAppender undef
+      Log::Log4perl::JavaMap::SyslogAppender undef
+      Log::Log4perl::JavaMap::TestBuffer undef
+      Log::Log4perl::Layout undef
+      Log::Log4perl::Layout::NoopLayout undef
+      Log::Log4perl::Layout::PatternLayout undef
+      Log::Log4perl::Layout::PatternLayout::Multiline undef
+      Log::Log4perl::Layout::SimpleLayout undef
+      Log::Log4perl::Level undef
+      Log::Log4perl::Logger undef
+      Log::Log4perl::MDC undef
+      Log::Log4perl::NDC undef
+      Log::Log4perl::Resurrector undef
+      Log::Log4perl::Util undef
+      Log::Log4perl::Util::Semaphore undef
+      Log::Log4perl::Util::TimeTracker undef
+    requirements:
+      ExtUtils::MakeMaker 0
+      File::Path 2.0606
+      File::Spec 0.82
+      Test::More 0.45
   Module-Build-0.4218
     pathname: L/LE/LEONT/Module-Build-0.4218.tar.gz
     provides:
@@ -241,6 +354,31 @@ DISTRIBUTIONS
       Text::ParseWords 0
       perl 5.006001
       version 0.87
+  Module-Build-Tiny-0.039
+    pathname: L/LE/LEONT/Module-Build-Tiny-0.039.tar.gz
+    provides:
+      Module::Build::Tiny 0.039
+    requirements:
+      CPAN::Meta 0
+      DynaLoader 0
+      Exporter 5.57
+      ExtUtils::CBuilder 0
+      ExtUtils::Config 0.003
+      ExtUtils::Helpers 0.020
+      ExtUtils::Install 0
+      ExtUtils::InstallPaths 0.002
+      ExtUtils::ParseXS 0
+      File::Basename 0
+      File::Find 0
+      File::Path 0
+      File::Spec::Functions 0
+      Getopt::Long 2.36
+      JSON::PP 2
+      Pod::Man 0
+      TAP::Harness::Env 0
+      perl 5.006
+      strict 0
+      warnings 0
   Module-Implementation-0.09
     pathname: D/DR/DROLSKY/Module-Implementation-0.09.tar.gz
     provides:
@@ -292,6 +430,34 @@ DISTRIBUTIONS
       XSLoader 0
       strict 0
       warnings 0
+  PerlIO-via-Timeout-0.32
+    pathname: D/DA/DAMS/PerlIO-via-Timeout-0.32.tar.gz
+    provides:
+      PerlIO::via::Timeout 0.32
+    requirements:
+      Exporter 5.57
+      ExtUtils::MakeMaker 0
+      File::Spec 0
+      IO::Handle 0
+      IPC::Open3 0
+      Module::Build::Tiny 0.039
+      PerlIO::via 0
+      Test::More 0
+      Test::TCP 0
+      Time::HiRes 0
+  Redis-1.982
+    pathname: D/DA/DAMS/Redis-1.982.tar.gz
+    provides:
+      Redis 1.982
+      Redis::Hash 1.982
+      Redis::List 1.982
+      Redis::Sentinel 1.982
+    requirements:
+      ExtUtils::MakeMaker 6.63_03
+      IO::Socket::Timeout 0.29
+      Module::Build::Tiny 0.039
+      Try::Tiny 0
+      perl 5.008
   Sort-Naturally-1.03
     pathname: B/BI/BINGOS/Sort-Naturally-1.03.tar.gz
     provides:
