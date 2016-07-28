@@ -151,6 +151,29 @@ Name of channel to subscribe, defaults to 'suricata'.
    --exclude-dest-port 9103
  
 
+=head1 logstash integration
+
+The publisher puts a [@metadata][time] field inside the published event. In order to make use of
+it from logstash, one may use a logstash.conf that contains something like:
+
+ filter {
+   if [@metadata][time] {
+     date {
+       match => [ '[@metadata][time]' , 'ISO8601' ]
+     }
+   }
+ }
+
+Please note that in logstash, the @metadata structure is handled by the internal pipeline but is
+not included in the event when it is being output, e.g. in ElasticSearch.
+
+Optionally, one may elect to also remove the timestamp field from the event by putting an additional
+
+ remove_field => 'timestamp'
+
+after the match statement.
+
+
 =head1 author
 
 Athanasios Douitsis, L<aduitsis@cpan.org> 

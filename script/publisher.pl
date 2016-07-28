@@ -85,9 +85,15 @@ sub control_handler {
 			if( $logstash ) {
 				# logstash flat JSON, suitable for logstash redis subscribers
 				if( exists $d->{alert} ) {
+					# copy everything from the alert level to the top level
 					$d->{ $_ } = $d->{alert}->{$_} for keys %{$d->{alert}};
+					# and delete the nested field
 					delete $d->{alert};
 					$d->{host} = hostname;	
+					# also add a [@metadata][time] field, so 
+					# that logstash may adjust its @timestamp
+					# suricata's timestamp format is just fine for logstash
+					$d->{'@metadata'}->{time} = $d->{timestamp};
 				}
 				$redis->publish( "logstash-$channel" => encode_json( $d ) );
 			}
