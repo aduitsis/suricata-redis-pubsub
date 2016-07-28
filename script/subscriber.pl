@@ -1,7 +1,6 @@
-#!/usr/bin/env perl
+#!/usr/bin/perl -w
 
-use v5.14;
-
+use v5.20;
 use warnings;
 use strict;
 use AnyEvent::Socket;
@@ -17,12 +16,26 @@ use FindBin qw($Bin);
 use lib "$Bin/../lib";
 use IPv6::Address;
 use Data::Printer;
+use Log::Log4perl;
+use POSIX;
+
+select STDOUT; $| = 1;
+
+for my $lib (@INC) {
+	my $logger_file = $lib.'/subscriber.logger';
+	if (-f $logger_file) {
+		Log::Log4perl->init($logger_file);
+	}
+}
+my $logger = Log::Log4perl->get_logger;
+
 
 GetOptions(
 	'debug|d'		=> \my $DEBUG,
 	'redis_host|r=s'	=> \my $redis_host,
 	'redis_port|p=i'	=> \( my $redis_port = 6379 ),
-	'user|u=s'		=> \( my $run_as = 'nobody' ),
+	'nodrop'		=> \( my $no_drop ),
+	'user|u=s'		=> \( my $run_as ),
 	'tick|t=i'		=> \( my $tick = 10 ),
 	'dest=s'		=> \( my $global_destination = 'self' ),
 	'help|h|?'		=> \( my $help ),
@@ -38,14 +51,46 @@ GetOptions(
 
 ## pod2usage(-verbose=>2) if $help;
 
+# now drop privileges https://gist.github.com/tommybutler/6944027
+if( $run_as ) {
+	my ( $uid, $gid ) = ( getpwnam $run_as )[ 2, 3 ];
+	die $! unless $uid && $gid;
+	if ( $> == 0 ) {
+		POSIX::setgid( $gid ); # GID must be set before UID!
+		POSIX::setuid( $uid );
+	}
+	else {
+		die "Running as $> and cannot switch to nobody";
+	}
+}
+
 $redis_host // die 'please supply the redis server with the --redis_host option';
 
 my $quit_program = AnyEvent->condvar;
+
+$SIG{PIPE} = sub {
+	$logger->info("pipe broke");
+	$quit_program->send;
+};
+# for some reason the above works while the
+# following doesn't. 
+#my $sigpipe = AnyEvent->signal (
+#	signal => 'PIPE',
+#	cb => sub {
+#		$quit_program->send;
+#		$logger->info("exiting...");
+#		exit;
+#	}
+#);
 
 my @excluded_sources = map { IPv4Subnet->new( $_ ) } @{ $exclude_sources } ;
 my @excluded_destinations = map { IPv4Subnet->new( $_ ) } @{ $exclude_destinations } ;
 
 my %ips;
+
+$logger->info("Subscriber pid $$ starting");
+
+
 
 my $redis = AnyEvent::Redis->new(
 	host => $redis_host,
@@ -58,40 +103,50 @@ my $redis = AnyEvent::Redis->new(
 my $cv = $redis->subscribe($channel, sub {
 	my ( $json, $channel ) = @_;
 	my $message = decode_json( $json );	
-	$DEBUG && p $message;
+	$logger->debug('new message:'.join(' ',map { $_.'='.$message->{event}->{$_} } sort keys %{$message->{event}} ));
 	my $ip = $message->{ event }->{ src_ip };
 	if( $message->{event}->{alert}->{severity} > $severity_threshold ) {
-		$DEBUG && say STDERR "event excluded due to severity";
+		$logger->debug("event excluded due to severity");
 	}
 	elsif( any { $_ eq $message->{event}->{alert}->{signature_id} } @{$exclude_sigs} ) {
-		$DEBUG && say STDERR "event excluded due to signature";
+		$logger->debug("event excluded due to signature");
 	}
 	elsif( any { $_->contains( $message->{event}->{src_ip} ) } @excluded_sources ) {
-		$DEBUG && say STDERR "event excluded due to source IP"
+		$logger->debug( "event excluded due to source IP");
 	}
 	elsif( any { $_->contains( $message->{event}->{dest_ip} ) } @excluded_destinations ) {
-		$DEBUG && say STDERR "event excluded due to destination IP"
+		$logger->debug( "event excluded due to destination IP");
 	}
 	elsif( any { $message->{ event }->{ dest_port } == $_ } @{$exclude_dest_ports} ) {
-		$DEBUG && say STDERR "event excluded due to dest port"
+		$logger->debug( "event excluded due to dest port");
 	}
 	elsif( any { $message->{ event }->{ src_port } == $_ } @{$exclude_src_ports} ) {
-		$DEBUG && say STDERR "event excluded due to src port"
+		$logger->debug( "event excluded due to src port");
 	}
 	else {
-		say "announce route $ip/32 next-hop $global_destination";
+		$logger->info(join(' ',
+			$message->{event}->{proto},
+			$message->{event}->{src_ip}.':'.$message->{event}->{src_port},
+			$message->{event}->{dest_ip}.':'.$message->{event}->{dest_port},
+			$message->{event}->{alert}->{category}.' '.$message->{event}->{alert}->{signature}.' '.$message->{event}->{alert}->{signature_id},
+		));
+		# announce route 1.2.3.4/32 next-hop self
+		my $str = "announce route $ip/32 next-hop $global_destination";
+		$logger->info($str);
+		say $str;
 		# ($actual_channel is provided for pattern subscriptions.)
 		$ips{ $ip } = $duration;
 	}
 });
 
 my $w = AnyEvent->timer (after => 0, interval => $tick, cb => sub {
-	$DEBUG && say STDERR 'tick';
+	$logger->trace( 'tick');
 	for(keys %ips) {
 		$ips{ $_ } -= $tick;
 		if ($ips{ $_ }<=0) {
-			$DEBUG && say STDERR '- '. $_;
-			say "withdraw route $_/32 next-hop $global_destination";
+			my $str = "withdraw route $_/32 next-hop $global_destination";
+			$logger->info($str);
+			say $str;
 			delete $ips{ $_ };
 		}
 		$DEBUG && say STDERR Dumper(\%ips)
@@ -101,7 +156,7 @@ my $w = AnyEvent->timer (after => 0, interval => $tick, cb => sub {
 
 $quit_program->recv;
 
-
+$logger->info('Told to exit, possibly due to sigpipe...bye!');
 
 # $VAR1 = {
 #           'timestamp' => '2016-06-08T22:29:16.250407+0300',

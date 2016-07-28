@@ -24,6 +24,16 @@ time, a countdown is initiated for that source and when it reaches zero the
 source is withdrawn with an appropriate exabgp message. The incoming messages
 can be filtered by signature, source IP prefix or severity. 
 
+=head1 subscriber logger
+
+As the subscriber will usually run as a client program under exabgp, it may be
+a little difficult to figure out what it is doing. So, the program can output
+informational and debug messages in a separate file. This is done via 
+Log::Log4Perl. Look at the log4j-compatible logger configuration file under
+the lib/ directory. The default logger configuration tries to output info
+messages to /var/log/subscriber.log. If exabgp is running as a non-root user
+(most probable), B<make sure to adjust the permissions so that the subscriber
+can actually write to that file!>.
 
 =head1 options
 
@@ -45,7 +55,12 @@ does not have a default value.
 
 =item B<-u|--user> I<userid>
 
-Drop privileges to user I<userid>. Defaults to nobody.
+Drop privileges to user I<userid>. Defaults to nobody for the publisher. This
+means that the publisher will try to drop privileges by default. The 
+subscriber on the other hand will only try to change uid if this option is
+present. For usage as an exabgp client program, this option will probably
+won't be too useful, as exabgp usually runs as a non privileged user already.
+Which basically means that trying to change uid will invariably fail.
 
 =item B<-s|--sock> I<socket>
 
@@ -78,6 +93,8 @@ and L<https://github.com/elastic/kibana/issues/1084>.
 =back 
 
 =head2 subscriber
+
+=over
 
 =item B<-r|--redis_host> I<redis server>
 
@@ -135,6 +152,7 @@ Time to live of a BGP announcement. After I<duration> seconds elapse, the BGP an
 
 Name of channel to subscribe, defaults to 'suricata'.
 
+=back
 
 =head1 examples
 
