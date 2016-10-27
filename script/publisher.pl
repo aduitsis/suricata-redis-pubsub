@@ -77,7 +77,7 @@ sub control_handler {
 			chomp $input;
 			my $d  = decode_json $input;
 			# say STDERR Dumper($d);
-			say $d->{ src_ip } . ' --> '. $d->{ dest_ip } . '  ' . $d->{ alert }->{ signature } . ' ' . $d->{ alert }->{ signature_id };
+			say $d->{ src_ip } . ' --> '. $d->{ dest_ip } . '  ' . $d->{ alert }->{ signature } . ' ' . $d->{ alert }->{ signature_id } . ' (sev:' . $d->{ alert }->{ severity } .')';
 
 			# evaluate modules
 			for my $module (@found) {
