@@ -7,6 +7,7 @@ use AnyEvent::Socket;
 use Data::Dumper;
 use Fatal qw(open close);
 use FindBin qw($Bin);
+use lib "$Bin/../lib";
 use Getopt::Long;
 use Pod::Usage;
 use IO::Handle;
@@ -14,6 +15,11 @@ use JSON;
 use Redis;
 use POSIX;
 use Sys::Hostname;
+use Module::Find;
+
+my @found = usesub Suricata::Plugins;
+
+say "Found modules: ".join(',',@found);
 
 GetOptions(
 	'debug|d'	=> \my $DEBUG,
@@ -72,6 +78,18 @@ sub control_handler {
 			my $d  = decode_json $input;
 			# say STDERR Dumper($d);
 			say $d->{ src_ip } . ' '. $d->{ alert }->{ signature } . ' ' . $d->{ alert }->{ signature_id };
+
+			# evaluate modules
+			for my $module (@found) {
+				my $ret = $module->plugin_function( $d );
+				# say STDERR join(' ' , map( { "$_ = ".$ret->{$_} } keys %{$ret} ));
+				if( ( exists( $ret->{ command } ) ) && ( $ret->{ command } eq 'ignore' ) ) {
+					say $ret->{ message } if exists($ret->{ message });
+					#say STDERR "Skipping because $module said so";
+					return
+				}
+			}
+
 			#$redis->set( 'suricata:'.$d->{ src_ip } => $d->{ src_ip } , EX => 60 );
 			my $message = {
 				version		=> 1,
