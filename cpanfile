@@ -1,4 +1,5 @@
-requires 'AnyEvent::Socket';
+requires 'Module::Install';
+requires 'AnyEvent' => '7.14';
 requires 'Data::Dumper';
 requires 'JSON';
 requires 'AnyEvent::Redis';
