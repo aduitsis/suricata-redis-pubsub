@@ -1,13 +1,14 @@
-#!/usr/bin/env perl
+#!/usr/local/bin/perl
 
 use v5.20;
 use warnings;
 use strict;
-use AnyEvent::Socket;
 use Data::Dumper;
 use Fatal qw(open close);
 use FindBin qw($Bin);
 use lib "$Bin/../lib";
+use lib "$Bin/../local/lib/perl5";
+use AnyEvent::Socket;
 use Getopt::Long;
 use Pod::Usage;
 use IO::Handle;
@@ -76,7 +77,9 @@ sub control_handler {
                         };
 			chomp $input;
 			my $d  = decode_json $input;
-			# say STDERR Dumper($d);
+			#say STDERR Dumper($d);
+			exists $d->{ src_ip } or return;
+			exists $d->{ dest_ip } or return;
 			say $d->{ src_ip } . ' --> '. $d->{ dest_ip } . '  ' . $d->{ alert }->{ signature } . ' ' . $d->{ alert }->{ signature_id } . ' (sev:' . $d->{ alert }->{ severity } .')';
 
 			# evaluate modules
